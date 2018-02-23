@@ -1,12 +1,14 @@
 <template>
   <div class="ui container padding top bottom big">
     <MainTable></MainTable>
+    <Matches></Matches>
   </div>
 </template>
 
 <script>
 import MainTable from './MainTable'
 import Header from './Header'
+import Matches from './Matches'
 
 export default {
   name: 'Main',
@@ -17,7 +19,8 @@ export default {
   },
   components: {
     MainTable,
-    Header
+    Header,
+    Matches
   }
 }
 </script>

@@ -8,35 +8,11 @@
             <th>Partidos Jugados</th>
           </tr>
         </thead>
-        <transition-group name="flip-list" tag="tbody">
-          <tr v-bind:class="{ editing: participant.key === editedKey }" v-for="participant in sortedRank" v-bind:key="participant.key" >
+        <transition-group name="flip-list" tag="tbody" v-on:leave="afterLeave">
+          <tr v-for="participant in sortedRank" v-bind:key="participant.key" >
             <td>{{ participant.name }}</td>
-              <td v-on:dblclick.prevent="editPoints(participant)">
-            <v-touch v-on:doubletap.prevent="editPoints(participant)" class="vertical middle">
-                
-                <span class="points">{{ participant.points }}</span>
-                <div class="editPoints ui input">
-                  <input class="edit" type="text"
-                    v-model="editParticipant.points"
-                    v-on:keyup.enter.prevent="doneEdit(participant)"
-                    v-on:keyup.esc.prevent="cancelEdit(participant)">       
-                </div> 
-                </v-touch>   
-              </td>
-            
-              <td v-on:dblclick.prevent="editPoints(participant)">
-                <v-touch v-on:doubletap.prevent="editPoints(participant)" class="vertical middle">
-
-                <span class="matches">{{ participant.matches }}</span>
-                <div class="ui input">
-                  <input class="edit" type="text"
-                    v-model="editParticipant.matches"
-                    v-on:keyup.enter.prevent="doneEdit(participant)"
-                    v-on:keyup.esc.prevent="cancelEdit(participant)">       
-                </div>    
-                </v-touch>
-              </td>
-                    
+            <td>{{ participant.points }}</td>
+            <td>{{ participant.matches }}</td>                    
           </tr>
         </transition-group>
         <tfoot>
@@ -76,16 +52,11 @@ export default {
         name: '',
         points: 0,
         matches: 0
-      },
-      editParticipant: {
-        points: 0,
-        matches: 0
-      },
-      editedKey: null
+      }
     }
   },
   computed: {
-    sortedRank: function(rank) {
+    sortedRank: function() {
       return this.rank.sort(this.comparatorRank);
     }
   },
@@ -93,29 +64,14 @@ export default {
     addParticipant: function(evt) {
       if (this.newParticipant.name) {
         var dateMilliseconds = '-' + new Date().getTime();
-        db.ref(`rank/${dateMilliseconds}`).set(Object.assign({}, this.newParticipant, {key: dateMilliseconds}));
+        db.ref(`rank/${dateMilliseconds}`).set(Object.assign({}, this.newParticipant, {key: dateMilliseconds, position: this.rank.length + 1}));
         this.newParticipant.name = '';
         evt.target.blur();
       }
     },
-    editPoints: function(participant) {
-      this.editParticipant.points = participant.points;
-      this.editParticipant.matches = participant.matches;
-      this.editedKey = participant.key;
-      setTimeout(() => this.$el.querySelector('.editing .editPoints .edit').focus(), 0);
-    },   
-    doneEdit: function() {
-      db.ref(`rank/${this.editedKey}`)
-        .update({ 
-          points: this.editParticipant.points, 
-          matches: this.editParticipant.matches
-        })
-        .then(() => { 
-          this.editedKey = null;
-        });
-    },
-    cancelEdit: function() {
-      this.editedKey = null;
+    afterLeave: function(el) {
+      console.log('el', el);
+      console.log('rank', this.sortedRank);
     }
   }
 }
@@ -125,18 +81,6 @@ export default {
 .flip-list-move {
   transition: transform 1s;
 }
-.edit {
-  display: none;
-}
-.editing .edit {
-  display: inline;
-}
-.editing .points {
-  display: none;
-}
-.editing .matches {
-  display: none;
-}
 tr td:first-child {
   width: 100px;
 }
@@ -145,18 +89,12 @@ tr:nth-child(-n+4) {
 }
 .legend {
   background: lightgreen; 
-  padding: .92857143em 1.14285714em;
+  padding: 1em;
   line-height: 1;
 }
-td,
-.vertical.middle {
+td {
   height: 60px;
   width: 250px;
-}
-.vertical.middle {
-  vertical-align: middle;
-  height: 50px;
-  display: table-cell;
 }
 </style>
 
