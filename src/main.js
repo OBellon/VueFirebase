@@ -5,7 +5,6 @@ import VueFire from 'vuefire'
 import App from './App'
 import router from './router'
 
-window.$ = window.jQuery = require('jquery');
 import 'semantic-ui-css/semantic.min.css'
 import 'semantic-ui-css/semantic.min.js'
 import SuiVue from 'semantic-ui-vue'
