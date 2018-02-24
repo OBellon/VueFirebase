@@ -2,6 +2,7 @@
   <div class="ui container padding top bottom big">
     <MainTable></MainTable>
     <Matches></Matches>
+    <MatchesList></MatchesList>
   </div>
 </template>
 
@@ -9,6 +10,7 @@
 import MainTable from './MainTable'
 import Header from './Header'
 import Matches from './Matches'
+import MatchesList from './MatchesList'
 
 export default {
   name: 'Main',
@@ -20,7 +22,8 @@ export default {
   components: {
     MainTable,
     Header,
-    Matches
+    Matches,
+    MatchesList
   }
 }
 </script>

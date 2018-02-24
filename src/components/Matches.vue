@@ -2,7 +2,7 @@
   <div class="ui form container padding top">
     <div class="fields vertical middle">
       <div class="four wide field">
-        <select class="ui fluid selection search dropdown" v-model="match.participant1">
+        <select class="ui fluid selection search dropdown name1" v-model="match.participant1">
           <option value="0">Primer participante</option>
           <option v-for="participant in rank" v-bind:key="participant.key" 
                 :value="participant.key">{{ participant.name }}</option> 
@@ -18,7 +18,7 @@
       <div class="four wide field">
         <div class="one field">
           <div class="field">
-            <select class="ui fluid search selection dropdown" v-model="match.participant2">
+            <select class="ui fluid search selection dropdown name2" v-model="match.participant2">
               <option value="0">Segundo participante</option>
               <option v-for="participant in rank" v-bind:key="participant.key" 
                 :value="participant.key">{{ participant.name }}</option> 
@@ -40,11 +40,13 @@ import comparatorRank from '../utils'
 export default {
   name: 'Matches',
   firebase: {
-    rank: db.ref('rank')
+    rank: db.ref('rank'),
+    matches: db.ref('matches')
   },
   data() {
     return {
       rank: this.rank,
+      matches: this.matches,
       comparatorRank: comparatorRank,      
       match: {
         participant1: '0',
@@ -65,6 +67,7 @@ export default {
   methods: {
     addMatch: function() {
       let matchResultObj = this.getResult();
+      this.addMatchToDataBase();
       let loser = this.getRank(matchResultObj.loser);
       let winner = this.getRank(matchResultObj.winner);
       Promise.all([loser, winner])
@@ -83,17 +86,7 @@ export default {
           let updatePositionLoser = this.updatePositions(loser);
           let updatePositionWinner = this.updatePositions(winner);
 
-          Promise.all([updatePositionLoser, updatePositionWinner])
-            .then(function(values){
-              this.sortedRank.forEach(function(participant){
-                let index = this.sortedRank.findIndex(item => item.key === participant.key);
-                this.$firebaseRefs.rank.child(participant.key)
-                  .once('value')
-                  .then(function(snapshot){
-                    snapshot.ref.update({position: index + 1})
-                  });
-              }.bind(this));
-            }.bind(this))
+          this.refreshPositions(updatePositionLoser, updatePositionWinner);
         }.bind(this));
 
     },
@@ -112,6 +105,18 @@ export default {
       matchObj.winner.participantId = this.match.score1 < this.match.score2 ? this.match.participant2 : this.match.participant1; 
       return matchObj;
     },
+    addMatchToDataBase: function() {
+      const actualDay = new Date().getDay();
+      const actualMonth = new Date().getMonth();
+      const actualYear = new Date().getUTCFullYear();
+      this.$firebaseRefs.matches.child(`${actualDay}-${actualMonth}-${actualYear}`)
+        .once('value')
+        .then(function(snapshot){
+          const name1 = $(this.$el).find('.name1 option:selected').text();
+          const name2 = $(this.$el).find('.name2 option:selected').text();
+          snapshot.ref.push(Object.assign({}, this.match, {name1, name2}));
+        }.bind(this));
+    },
     getRank: function(participant) {
       return this.$firebaseRefs.rank.child(participant.participantId)
         .once('value')
@@ -125,6 +130,19 @@ export default {
         .then(function(snapshot) {
           return snapshot.ref.update(participant);
         });
+    },
+    refreshPositions: function(updatePositionLoser, updatePositionWinner) {
+      Promise.all([updatePositionLoser, updatePositionWinner])
+        .then(function(values){
+          this.sortedRank.forEach(function(participant){
+            let index = this.sortedRank.findIndex(item => item.key === participant.key);
+            this.$firebaseRefs.rank.child(participant.key)
+              .once('value')
+              .then(function(snapshot){
+                snapshot.ref.update({position: index + 1})
+              });
+          }.bind(this));
+        }.bind(this))
     }
   },
   mounted: function () {
