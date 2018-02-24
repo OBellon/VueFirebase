@@ -1,37 +1,39 @@
 <template>
   <div class="ui form container padding top">
-    <div class="fields vertical middle">
-      <div class="four wide field">
-        <select class="ui fluid selection search dropdown name1" v-model="match.participant1">
-          <option value="0">Primer participante</option>
-          <option v-for="participant in rank" v-bind:key="participant.key" 
-                :value="participant.key">{{ participant.name }}</option> 
-        </select>
-      </div>
-      <div class="four wide field">
-        <input type="text" v-model="match.score1" placeholder="0" />
-      </div>
-      <div>vs.</div>
-      <div class="four wide field">
-        <input type="text" v-model="match.score2" placeholder="0" />
-      </div>
-      <div class="four wide field">
-        <div class="one field">
-          <div class="field">
-            <select class="ui fluid search selection dropdown name2" v-model="match.participant2">
-              <option value="0">Segundo participante</option>
-              <option v-for="participant in rank" v-bind:key="participant.key" 
-                :value="participant.key">{{ participant.name }}</option> 
-            </select>
+    <div class="padding bottom">
+      <div class="fields vertical middle">
+        <div class="four wide field">
+          <select class="ui fluid selection search dropdown name1" v-model="match.participant1">
+            <option value="0">Primer participante</option>
+            <option v-for="participant in rank" v-bind:key="participant.key" 
+                  :value="participant.key">{{ participant.name }}</option> 
+          </select>
+        </div>
+        <div class="four wide field">
+          <input type="text" v-model="match.score1" placeholder="0" />
+        </div>
+        <div>vs.</div>
+        <div class="four wide field">
+          <input type="text" v-model="match.score2" placeholder="0" />
+        </div>
+        <div class="four wide field">
+          <div class="one field">
+            <div class="field">
+              <select class="ui fluid search selection dropdown name2" v-model="match.participant2">
+                <option value="0">Segundo participante</option>
+                <option v-for="participant in rank" v-bind:key="participant.key" 
+                  :value="participant.key">{{ participant.name }}</option> 
+              </select>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="ui vertical animated button" v-on:click.prevent="addMatch">
-      <div class="visible content">Añadir</div>
-      <div class="hidden content">
-        <i v-if="validMatch" class="check icon"></i>
-        <i v-else class="thumbs down icon"></i>
+      <div class="ui vertical animated button large" v-on:click.prevent="addMatch">
+        <div class="visible content">Añadir</div>
+        <div class="hidden content">
+          <i v-if="validMatch" class="check icon"></i>
+          <i v-else class="thumbs down icon"></i>
+        </div>
       </div>
     </div>
     <div class="ui horizontal divider">
@@ -65,7 +67,10 @@ export default {
   },
   computed: {
     validMatch: function() {
-      return Object.values(this.match).filter(prop => prop && prop !== '0').length === Object.values(this.match).length;
+      const name1 = $(this.$el).find('.name1 select').val();
+      const name2 = $(this.$el).find('.name2 select').val();
+      return Object.values(this.match).filter(prop => prop && prop !== '0').length === Object.values(this.match).length
+        && name1 !== name2;
     },
     sortedRank: function() {
       return this.rank.sort(this.comparatorRank);
@@ -151,6 +156,17 @@ export default {
               });
           }.bind(this));
         }.bind(this))
+        .then(function(){
+          this.resetForm();
+        }.bind(this));
+    },
+    resetForm: function() {
+      this.match.participant1 = '';
+      this.match.participant2 = '';
+      this.match.score1 = '';
+      this.match.score2 = '';
+      $(this.$el).find('.name1 select').val('0');
+      $(this.$el).find('.name2 select').val('0');
     }
   },
   mounted: function () {
@@ -164,6 +180,9 @@ export default {
 <style scoped>
 .container.padding.top {
   padding-top: 50px; 
+}
+.padding.bottom {
+  padding-bottom: 50px;
 }
 .vertical.middle {
   align-items: center;
