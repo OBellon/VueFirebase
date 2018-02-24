@@ -26,7 +26,7 @@
     </h1>
     <div class="ui horizontal divider">
         ||
-      </div>
+    </div>
   </div>
 </template>
 

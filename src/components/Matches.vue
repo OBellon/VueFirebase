@@ -27,9 +27,16 @@
         </div>
       </div>
     </div>
-    <button class="ui button" v-on:click.prevent="addMatch">
-      Añadir
-    </button>
+    <div class="ui vertical animated button" v-on:click.prevent="addMatch">
+      <div class="visible content">Añadir</div>
+      <div class="hidden content">
+        <i v-if="validMatch" class="check icon"></i>
+        <i v-else class="thumbs down icon"></i>
+      </div>
+    </div>
+    <div class="ui horizontal divider">
+        ||
+    </div>
   </div>
 </template>
 
@@ -66,6 +73,7 @@ export default {
   },
   methods: {
     addMatch: function() {
+      if (!this.validMatch) return;
       let matchResultObj = this.getResult();
       this.addMatchToDataBase();
       let loser = this.getRank(matchResultObj.loser);
@@ -106,8 +114,8 @@ export default {
       return matchObj;
     },
     addMatchToDataBase: function() {
-      const actualDay = new Date().getDay();
-      const actualMonth = new Date().getMonth();
+      const actualDay = new Date().getDate();
+      const actualMonth = new Date().getMonth() + 1;
       const actualYear = new Date().getUTCFullYear();
       this.$firebaseRefs.matches.child(`${actualDay}-${actualMonth}-${actualYear}`)
         .once('value')
