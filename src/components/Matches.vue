@@ -5,7 +5,7 @@
         <div class="four wide field">
           <select class="ui fluid selection search dropdown name1" v-model="match.participant1">
             <option value="0">Primer participante</option>
-            <option v-for="participant in rank" v-bind:key="participant.key" 
+            <option v-for="participant in filteredRank2" v-bind:key="participant.key" 
                   :value="participant.key">{{ participant.name }}</option> 
           </select>
         </div>
@@ -21,7 +21,7 @@
             <div class="field">
               <select class="ui fluid search selection dropdown name2" v-model="match.participant2">
                 <option value="0">Segundo participante</option>
-                <option v-for="participant in rank" v-bind:key="participant.key" 
+                <option v-for="participant in filteredRank1" v-bind:key="participant.key" 
                   :value="participant.key">{{ participant.name }}</option> 
               </select>
             </div>
@@ -74,6 +74,12 @@ export default {
     },
     sortedRank: function() {
       return this.rank.sort(this.comparatorRank);
+    },
+    filteredRank1: function() {
+      return this.filterRank(this.match.participant1);      
+    },
+    filteredRank2: function() {
+      return this.filterRank(this.match.participant2);
     }
   },
   methods: {
@@ -167,6 +173,11 @@ export default {
       this.match.score2 = '';
       $(this.$el).find('.name1 select').val('0');
       $(this.$el).find('.name2 select').val('0');
+    },
+    filterRank: function(participantId) {
+      if (participantId === '0') return this.rank;
+      const position = this.rank.find(item => item.key === participantId).position;
+      return this.rank.filter(item => Math.abs(item.position - position) <= 2 && item.position !== position);
     }
   },
   mounted: function () {
