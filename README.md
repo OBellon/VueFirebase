@@ -8,7 +8,7 @@
 Create a config.js file inside ```src/``` with your Firebase keys as follows:
 
 ```
-export default = {
+export default {
   apiKey: '<your-api-key>',
   authDomain: '<your-auth-domain>',
   databaseURL: '<your-database-url>',
